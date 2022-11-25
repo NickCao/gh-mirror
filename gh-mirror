@@ -6,7 +6,6 @@ Mirror all GitHub repositories for a user, maintaining metadata.
 This can be useful when maintaining a local mirror.
 """
 
-from __future__ import print_function
 import itertools
 import json
 import os
@@ -15,10 +14,7 @@ import subprocess
 import sys
 import argparse
 
-try:
-    from urllib.request import urlopen
-except ImportError:  # Python 2 fallback
-    from urllib import urlopen
+from urllib.request import urlopen, Request
 
 
 def repos(user):
@@ -30,9 +26,11 @@ def repos(user):
     """
 
     for page in itertools.count(start=1):
-        res_handle = urlopen(
-            "https://api.github.com/users/%s/repos?page=%d" % (user, page)
+        req = Request(
+            f"https://api.github.com/users/{user}/repos?page={page}",
+            headers={"Authorization": os.environ["AUTHORIZATION"]},
         )
+        res_handle = urlopen(req)
         res_encoding = "utf8"
         res_json = json.loads(res_handle.read().decode(res_encoding))
 
